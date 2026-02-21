@@ -14,16 +14,21 @@ var animals = map[string]func(string) Animal{
 }
 
 var actions = map[string]func(Animal) string{
-	"eat":   eat,
-	"move":  move,
-	"speak": speak,
+	"eat": func(a Animal) string {
+		return a.eat()
+	},
+	"move": func(a Animal) string {
+		return a.move()
+	},
+	"speak": func(a Animal) string {
+		return a.speak()
+	},
 }
 
 type Animal interface {
-	foodEaten() string
-	locomotion() string
-	SpokenSound() string
-	getName() string
+	eat() string
+	move() string
+	speak() string
 }
 
 func newAnimal(animalType string, name string) (Animal, error) {
@@ -32,18 +37,6 @@ func newAnimal(animalType string, name string) (Animal, error) {
 		return Animal(nil), fmt.Errorf("%s not recognized. Available options are: bird, snake and cow\n", animalType)
 	}
 	return a(name), nil
-}
-
-func eat(a Animal) string {
-	return a.foodEaten()
-}
-
-func move(a Animal) string {
-	return a.locomotion()
-}
-
-func speak(a Animal) string {
-	return a.SpokenSound()
 }
 
 type bird struct {
@@ -56,19 +49,15 @@ func newBird(name string) Animal {
 	}
 }
 
-func (o bird) getName() string {
-	return o.name
-}
-
-func (o bird) foodEaten() string {
+func (o bird) eat() string {
 	return fmt.Sprintf("worms")
 }
 
-func (o bird) locomotion() string {
+func (o bird) move() string {
 	return fmt.Sprintf("fly")
 }
 
-func (o bird) SpokenSound() string {
+func (o bird) speak() string {
 	return fmt.Sprintf("peep")
 }
 
@@ -82,19 +71,15 @@ func newSnake(name string) Animal {
 	}
 }
 
-func (o snake) getName() string {
-	return o.name
-}
-
-func (o snake) foodEaten() string {
+func (o snake) eat() string {
 	return fmt.Sprintf("mice")
 }
 
-func (o snake) locomotion() string {
+func (o snake) move() string {
 	return fmt.Sprintf("slither")
 }
 
-func (o snake) SpokenSound() string {
+func (o snake) speak() string {
 	return fmt.Sprintf("hsss")
 }
 
@@ -108,19 +93,15 @@ func newCow(name string) Animal {
 	}
 }
 
-func (o cow) getName() string {
-	return o.name
-}
-
-func (o cow) foodEaten() string {
+func (o cow) eat() string {
 	return fmt.Sprintf("grass")
 }
 
-func (o cow) locomotion() string {
+func (o cow) move() string {
 	return fmt.Sprintf("walk")
 }
 
-func (o cow) SpokenSound() string {
+func (o cow) speak() string {
 	return fmt.Sprintf("moo")
 }
 
