@@ -145,6 +145,8 @@ func main() {
 
 	userAnimals := make(map[string]Animal)
 	for {
+		fmt.Print("> ")
+
 		input, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("unknown error", err)
@@ -158,8 +160,8 @@ func main() {
 		}
 
 		var command, animalName, property string
-		if commands := strings.Split(input, " "); len(commands) < 3 {
-			fmt.Println("command nos valid, check your spelling")
+		if commands := strings.Fields(input); len(commands) < 3 {
+			fmt.Println("command not valid, check your spelling")
 			continue
 		} else {
 			command = commands[0]
