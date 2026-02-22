@@ -119,7 +119,6 @@ func (o cow) Speak() {
 }
 
 func main() {
-	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Hi, Welcome to Friend from the Farm")
 	fmt.Println("Here you can choose a set of animals from the list of available animal")
 	fmt.Println("You will be able to provide a name for each animal")
@@ -138,6 +137,7 @@ func main() {
 		"3: Speak\n")
 	fmt.Println("the command <exit> will stop the program\n")
 
+	reader := bufio.NewReader(os.Stdin)
 	userAnimals := make(map[string]Animal)
 	for {
 		fmt.Print("> ")
