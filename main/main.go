@@ -13,22 +13,22 @@ var animals = map[string]func(string) Animal{
 	"cow":   newCow,
 }
 
-var actions = map[string]func(Animal) string{
-	"eat": func(a Animal) string {
-		return a.eat()
+var actions = map[string]func(Animal){
+	"Eat": func(a Animal) {
+		a.Eat()
 	},
-	"move": func(a Animal) string {
-		return a.move()
+	"Move": func(a Animal) {
+		a.Move()
 	},
-	"speak": func(a Animal) string {
-		return a.speak()
+	"Speak": func(a Animal) {
+		a.Speak()
 	},
 }
 
 type Animal interface {
-	eat() string
-	move() string
-	speak() string
+	Eat()
+	Move()
+	Speak()
 }
 
 func newAnimal(animalType string, name string) (Animal, error) {
@@ -40,69 +40,87 @@ func newAnimal(animalType string, name string) (Animal, error) {
 }
 
 type bird struct {
-	name string
+	name  string
+	eat   string
+	move  string
+	speak string
 }
 
 func newBird(name string) Animal {
 	return bird{
-		name: name,
+		name:  name,
+		eat:   "worms",
+		move:  "fly",
+		speak: "peep",
 	}
 }
 
-func (o bird) eat() string {
-	return fmt.Sprintf("worms")
+func (o bird) Eat() {
+	fmt.Println(o.eat)
 }
 
-func (o bird) move() string {
-	return fmt.Sprintf("fly")
+func (o bird) Move() {
+	fmt.Println(o.move)
 }
 
-func (o bird) speak() string {
-	return fmt.Sprintf("peep")
+func (o bird) Speak() {
+	fmt.Println(o.speak)
 }
 
 type snake struct {
-	name string
+	name  string
+	eat   string
+	move  string
+	speak string
 }
 
 func newSnake(name string) Animal {
 	return snake{
-		name: name,
+		name:  name,
+		eat:   "mice",
+		move:  "slither",
+		speak: "hsss",
 	}
 }
 
-func (o snake) eat() string {
-	return fmt.Sprintf("mice")
+func (o snake) Eat() {
+	fmt.Println(o.eat)
 }
 
-func (o snake) move() string {
-	return fmt.Sprintf("slither")
+func (o snake) Move() {
+	fmt.Println(o.move)
 }
 
-func (o snake) speak() string {
-	return fmt.Sprintf("hsss")
+func (o snake) Speak() {
+	fmt.Println(o.speak)
 }
 
 type cow struct {
-	name string
+	name  string
+	eat   string
+	move  string
+	speak string
 }
 
 func newCow(name string) Animal {
 	return cow{
-		name: name,
+		name:  name,
+		eat:   "grass",
+		move:  "walk",
+		speak: "moo",
 	}
 }
 
-func (o cow) eat() string {
-	return fmt.Sprintf("grass")
+func (o cow) Eat() {
+	fmt.Println(o.eat)
 }
 
-func (o cow) move() string {
-	return fmt.Sprintf("walk")
+func (o cow) Move() {
+	fmt.Println(o.move)
 }
 
-func (o cow) speak() string {
-	return fmt.Sprintf("moo")
+func (o cow) Speak() {
+	fmt.Println(o.speak)
 }
 
 func main() {
@@ -120,9 +138,9 @@ func main() {
 	fmt.Println("query allows you to get animal information, for this comand you need to provide the name of the animal you want the information from and an action as follows" +
 		"query <name> action")
 	fmt.Println("THere are 3 abailable action for each animal\n" +
-		"1: eat\n" +
-		"2: move\n" +
-		"3: speak\n")
+		"1: Eat\n" +
+		"2: Move\n" +
+		"3: Speak\n")
 	fmt.Println("the command <exit> will stop the program\n")
 
 	userAnimals := make(map[string]Animal)
@@ -170,7 +188,7 @@ func main() {
 				fmt.Printf("action %s not found\n", property)
 				continue
 			}
-			fmt.Println(acc(a))
+			acc(a)
 		default:
 			continue
 
