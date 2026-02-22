@@ -9,27 +9,23 @@ import (
 	"unicode"
 )
 
-func BubbleSort(userInput []int) {
+func Swap(nums []int, i int) {
+	nums[i], nums[i+1] = nums[i+1], nums[i]
+}
 
-	for i := 0; i < len(userInput)-1; i++ {
-		for j, v := range userInput {
-			if j == i {
-				continue
-			}
-			if userInput[i] > v {
-				Swap(userInput, i)
+func BubbleSort(nums []int) {
+	n := len(nums)
+	for pass := 0; pass < n-1; pass++ {
+		for i := 0; i < n-1-pass; i++ {
+			if nums[i] > nums[i+1] {
+				Swap(nums, i)
 			}
 		}
 	}
-
-}
-
-func Swap(l []int, index int) {
-	l[index], l[index+1] = l[index+1], l[index]
 }
 
 func main() {
-	fmt.Println("Pleas, enter a sequence of 10 number, no less no more than that.")
+	fmt.Println("Pleas, enter a sequence of number, no more than 10.")
 
 	userInputReader := bufio.NewReader(os.Stdin)
 	for {
@@ -50,7 +46,7 @@ func main() {
 			continue
 		}
 
-		bubleSortedUserInput := make([]int, 0)
+		sanitizedUserInput := make([]int, 0)
 		sanitizedTextUserInput := strings.Join(strings.Fields(textUserInput), "")
 		for _, v := range sanitizedTextUserInput {
 			if !unicode.IsDigit(v) {
@@ -64,11 +60,11 @@ func main() {
 				continue
 			}
 
-			bubleSortedUserInput = append(bubleSortedUserInput, n)
+			sanitizedUserInput = append(sanitizedUserInput, n)
 		}
 
-		BubbleSort(bubleSortedUserInput)
+		BubbleSort(sanitizedUserInput)
 
-		fmt.Println(bubleSortedUserInput)
+		fmt.Println(sanitizedUserInput)
 	}
 }
