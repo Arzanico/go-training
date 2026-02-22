@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var animals = map[string]func(string) Animal{
+var animalFactories = map[string]func() Animal{
 	"bird":  newBird,
 	"snake": newSnake,
 	"cow":   newCow,
@@ -31,24 +31,22 @@ type Animal interface {
 	Speak()
 }
 
-func newAnimal(animalType string, name string) (Animal, error) {
-	a, ok := animals[strings.TrimSpace(strings.ToLower(animalType))]
+func newAnimal(animalType string) (Animal, error) {
+	a, ok := animalFactories[strings.TrimSpace(strings.ToLower(animalType))]
 	if !ok {
-		return Animal(nil), fmt.Errorf("%s not recognized. Available options are: bird, snake and cow\n", animalType)
+		return nil, fmt.Errorf("%s not recognized. Available options are: bird, snake and cow", animalType)
 	}
-	return a(name), nil
+	return a(), nil
 }
 
 type bird struct {
-	name  string
 	eat   string
 	move  string
 	speak string
 }
 
-func newBird(name string) Animal {
+func newBird() Animal {
 	return bird{
-		name:  name,
 		eat:   "worms",
 		move:  "fly",
 		speak: "peep",
@@ -68,15 +66,13 @@ func (o bird) Speak() {
 }
 
 type snake struct {
-	name  string
 	eat   string
 	move  string
 	speak string
 }
 
-func newSnake(name string) Animal {
+func newSnake() Animal {
 	return snake{
-		name:  name,
 		eat:   "mice",
 		move:  "slither",
 		speak: "hsss",
@@ -102,9 +98,8 @@ type cow struct {
 	speak string
 }
 
-func newCow(name string) Animal {
+func newCow() Animal {
 	return cow{
-		name:  name,
 		eat:   "grass",
 		move:  "walk",
 		speak: "moo",
@@ -159,21 +154,21 @@ func main() {
 			return
 		}
 
-		var command, animalName, property string
-		if commands := strings.Fields(input); len(commands) < 3 {
+		var command, animalName, typeOrAction string
+		if commands := strings.Fields(input); len(commands) != 3 {
 			fmt.Println("command not valid, check your spelling")
 			continue
 		} else {
 			command = commands[0]
 			animalName = commands[1]
-			property = commands[2]
+			typeOrAction = commands[2]
 		}
 
 		switch command {
 		case "newanimal":
-			a, newAnimalErr := newAnimal(property, animalName)
+			a, newAnimalErr := newAnimal(typeOrAction)
 			if newAnimalErr != nil {
-				fmt.Printf(" error %s", newAnimalErr.Error())
+				fmt.Printf(" error %s\n", newAnimalErr.Error())
 				continue
 			}
 			userAnimals[animalName] = a
@@ -185,9 +180,9 @@ func main() {
 				continue
 			}
 
-			acc, ok := actions[property]
+			acc, ok := actions[typeOrAction]
 			if !ok {
-				fmt.Printf("action %s not found\n", property)
+				fmt.Printf("action %s not found\n", typeOrAction)
 				continue
 			}
 			acc(a)
