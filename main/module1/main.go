@@ -41,7 +41,7 @@ func main() {
 		}
 
 		textUserInput = strings.TrimSuffix(textUserInput, "\n")
-		if len(textUserInput) != 10 {
+		if len(textUserInput) > 10 {
 			fmt.Println("Wrong input - check length")
 			continue
 		}
