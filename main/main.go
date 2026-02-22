@@ -14,13 +14,13 @@ var animals = map[string]func(string) Animal{
 }
 
 var actions = map[string]func(Animal){
-	"Eat": func(a Animal) {
+	"eat": func(a Animal) {
 		a.Eat()
 	},
-	"Move": func(a Animal) {
+	"move": func(a Animal) {
 		a.Move()
 	},
-	"Speak": func(a Animal) {
+	"speak": func(a Animal) {
 		a.Speak()
 	},
 }
