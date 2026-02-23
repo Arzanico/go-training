@@ -15,8 +15,8 @@ func Swap(nums []int, i int) {
 
 func BubbleSort(nums []int) {
 	n := len(nums)
-	for pass := 0; pass < n-1; pass++ {
-		for i := 0; i < n-1-pass; i++ {
+	for loop := 0; loop < n-1; loop++ {
+		for i := 0; i < n-1-loop; i++ {
 			if nums[i] > nums[i+1] {
 				Swap(nums, i)
 			}
@@ -25,7 +25,7 @@ func BubbleSort(nums []int) {
 }
 
 func main() {
-	fmt.Println("Pleas, enter a sequence of number, no more than 10.")
+	fmt.Println("Please, enter a sequence of number, no more than 10.")
 
 	userInputReader := bufio.NewReader(os.Stdin)
 	for {
