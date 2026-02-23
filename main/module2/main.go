@@ -63,7 +63,7 @@ func main() {
 		return
 	}
 
-	fmt.Printf("Displacement is %f", fn(t))
+	fmt.Printf("Displacement is %g", fn(t))
 	return
 
 }
