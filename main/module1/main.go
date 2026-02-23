@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"unicode"
 )
 
 func Swap(nums []int, i int) {
@@ -36,35 +35,30 @@ func main() {
 			continue
 		}
 
-		if textUserInput == "exit" {
+		sanitizedTextUserInput := strings.TrimSuffix(textUserInput, "\n")
+		if strings.EqualFold("exit", sanitizedTextUserInput) {
 			break
 		}
 
-		textUserInput = strings.TrimSuffix(textUserInput, "\n")
-		if len(textUserInput) > 10 {
+		if len(strings.Fields(sanitizedTextUserInput)) > 10 {
 			fmt.Println("Wrong input - check length")
 			continue
 		}
 
-		sanitizedUserInput := make([]int, 0)
-		sanitizedTextUserInput := strings.Join(strings.Fields(textUserInput), "")
-		for _, v := range sanitizedTextUserInput {
-			if !unicode.IsDigit(v) {
-				fmt.Println("Wrong input - check non numeric characters")
-				continue
-			}
+		sanitizedUserIntList := make([]int, 0)
+		for _, v := range strings.Fields(sanitizedTextUserInput) {
 
-			n, err := strconv.Atoi(string(v))
+			n, err := strconv.Atoi(v)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
 
-			sanitizedUserInput = append(sanitizedUserInput, n)
+			sanitizedUserIntList = append(sanitizedUserIntList, n)
 		}
 
-		BubbleSort(sanitizedUserInput)
+		BubbleSort(sanitizedUserIntList)
 
-		fmt.Println(sanitizedUserInput)
+		fmt.Println(sanitizedUserIntList)
 	}
 }
