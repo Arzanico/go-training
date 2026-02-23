@@ -1,3 +1,8 @@
-Moor's law says that the density of trnsistor will doulbe every 2 years.
-Not a days this is not valid, because increasin transistor density will increase power consumption and temperature, which causes the
-the law to be limited or not longer valid.
+Moor's law says that the density of transistor will double every 2 years.
+Not a days this is not longer valid, because few reasons:
+1 Temperature increases as power increases.
+2 Power increases as transistor density increases.
+3 Voltage scaling is limited due to noise or threshold voltage.
+4 Voltage scaling reduces (dynamic) power consumption
+
+In the other hand, the chips manufacters have changed the aproach of making chips more powerful by adding cores in the same chips.
