@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
+	b "bufio"
+	f "fmt"
 	"os"
-	"strings"
+	s "strings"
 )
 
 type Animal struct {
@@ -13,81 +13,53 @@ type Animal struct {
 	noise      string
 }
 
-func (animal *Animal) Eat() {
-	fmt.Println(animal.food)
+func (a Animal) Eat() {
+	f.Print(a.food, "\n")
 }
 
-func (animal *Animal) Move() {
-	fmt.Println(animal.locomotion)
+func (a Animal) Move() {
+	f.Print(a.locomotion, "\n")
 }
 
-func (animal *Animal) Speak() {
-	fmt.Println(animal.noise)
-}
-
-var (
-	cow   = Animal{food: "grass", locomotion: "walk", noise: "moo"}
-	bird  = Animal{food: "worms", locomotion: "fly", noise: "peep"}
-	snake = Animal{food: "mice", locomotion: "slither", noise: "hsss"}
-)
-
-func requestAnimal() {
-	scanner := bufio.NewScanner(os.Stdin)
-
-	fmt.Print("> ")
-
-	if scanner.Scan() {
-		input := scanner.Text()
-
-		words := strings.Fields(input)
-
-		if len(words) < 2 {
-			fmt.Println("Please enter both animal and info (e.g., 'cow eat')")
-			return
-		}
-
-		animal := words[0]
-		request := words[1]
-
-		switch animal {
-		case "cow":
-			switch request {
-			case "eat":
-				cow.Eat()
-			case "move":
-				cow.Move()
-			case "speak":
-				cow.Speak()
-			}
-
-		case "bird":
-			switch request {
-			case "eat":
-				bird.Eat()
-			case "move":
-				bird.Move()
-			case "speak":
-				bird.Speak()
-			}
-
-		case "snake":
-			switch request {
-			case "eat":
-				snake.Eat()
-			case "move":
-				snake.Move()
-			case "speak":
-				snake.Speak()
-			}
-
-		default:
-			fmt.Println("Unknown")
-		}
-	}
+func (a Animal) Speak() {
+	f.Print(a.noise, "\n")
 }
 
 func main() {
-	for {
-		requestAnimal()
+	var cow, bird, snake, temp Animal
+	var command []string
+	cow.food, cow.locomotion, cow.noise = "grass", "walk", "moo"
+	bird.food, bird.locomotion, bird.noise = "worms", "fly", "peep"
+	snake.food, snake.locomotion, snake.noise = "mice", "slither", "hsss"
+
+	scanner := b.NewScanner(os.Stdin)
+
+	for true {
+		f.Printf(">")
+		if scanner.Scan() {
+			command = s.Split(s.ToLower(scanner.Text()), " ")
+			if len(command) == 2 && (command[0] == "cow" || command[0] == "bird" || command[0] == "snake") && (command[1] == "eat" || command[1] == "move" || command[1] == "speak") {
+				switch command[0] {
+				case "cow":
+					temp = cow
+				case "bird":
+					temp = bird
+				case "snake":
+					temp = snake
+				}
+				switch command[1] {
+				case "eat":
+					temp.Eat()
+				case "move":
+					temp.Move()
+				case "speak":
+					temp.Speak()
+				}
+			} else {
+				f.Print("Invalid Syntax: >[animal] [action]\n")
+			}
+		} else {
+			f.Print("Error Scanning User Input\n")
+		}
 	}
 }
