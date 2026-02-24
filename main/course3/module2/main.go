@@ -25,20 +25,20 @@ func race() int {
 	var wg sync.WaitGroup
 	x := 0
 
-	for i := 0; i < 1000; i++ {
-		wg.Add(2)
-
-		go func() {
-			x = 1
-			wg.Done()
-		}()
-
-		go func() {
-			x = 2
-			wg.Done()
-		}()
-	}
+	wg.Add(2)
+	go routine1(&wg, &x)
+	go routine2(&wg, &x)
 
 	wg.Wait()
 	return x
+}
+
+func routine1(wg *sync.WaitGroup, x *int) {
+	*x = 1
+	wg.Done()
+}
+
+func routine2(wg *sync.WaitGroup, x *int) {
+	*x = 2
+	wg.Done()
 }
