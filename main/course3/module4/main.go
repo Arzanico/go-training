@@ -5,6 +5,11 @@ import (
 	"sync"
 )
 
+type Host struct {
+	guess1 sync.Mutex
+	guess2 sync.Mutex
+}
+
 type ChopS struct {
 	sync.Mutex
 }
