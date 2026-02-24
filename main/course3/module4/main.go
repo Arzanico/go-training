@@ -14,7 +14,7 @@ type Philo struct {
 }
 
 func (o Philo) eat() {
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 3; i++ {
 		o.leftCS.Lock()
 		o.rightCS.Lock()
 		fmt.Println("eating")
