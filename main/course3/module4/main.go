@@ -5,12 +5,6 @@ import (
 	"sync"
 )
 
-var askForEatChannel = make(chan struct{})
-
-var permissionChannel = make(chan bool)
-
-var philoChannel = make(chan struct{})
-
 type chopStick struct {
 	sync.Mutex
 }
@@ -20,70 +14,72 @@ type Philo struct {
 	leftCs, rightCs *chopStick
 }
 
-func (o Philo) eat(wg *sync.WaitGroup) {
-	counter := 0
-	for {
-		if counter == 3 {
-			break
-		}
-		askForEatChannel <- struct{}{}
-		select {
-		case p := <-permissionChannel:
-			if p {
-				o.leftCs.Lock()
-				o.rightCs.Lock()
-				fmt.Printf("starting to eat %d\n", o.n)
-				fmt.Printf("finishing to eat %d\n", o.n)
-				o.rightCs.Unlock()
-				o.leftCs.Unlock()
-				philoChannel <- struct{}{}
-				counter++
-			}
-		}
+// Host: semaphore of size 2 (at most 2 philosophers eating concurrently)
+type Host struct {
+	permits chan struct{}
+}
+
+func NewHost(maxConcurrent int) *Host {
+	h := &Host{permits: make(chan struct{}, maxConcurrent)}
+	// Fill with tokens
+	for i := 0; i < maxConcurrent; i++ {
+		h.permits <- struct{}{}
 	}
-	wg.Done()
+	return h
+}
+
+func (h *Host) Acquire() { <-h.permits }
+func (h *Host) Release() { h.permits <- struct{}{} }
+
+func (p Philo) eat(host *Host, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for meal := 0; meal < 3; meal++ {
+		// Ask permission from host (blocks if already 2 eating)
+		host.Acquire()
+
+		// Pick up chopsticks (any order; not lowest-numbered trick)
+		p.leftCs.Lock()
+		p.rightCs.Lock()
+
+		// Must print after obtaining necessary locks
+		fmt.Printf("starting to eat %d\n", p.n)
+
+		// Must print before releasing locks
+		fmt.Printf("finishing eating %d\n", p.n)
+
+		// Put down chopsticks
+		p.rightCs.Unlock()
+		p.leftCs.Unlock()
+
+		// Tell host we're done (free a slot)
+		host.Release()
+	}
 }
 
 func main() {
-
+	// Create chopsticks
 	cSticks := make([]*chopStick, 5)
 	for i := 0; i < 5; i++ {
 		cSticks[i] = new(chopStick)
 	}
 
-	go host()
+	// Create host (own goroutine not strictly needed for semaphore,
+	// but the host "executes independently" conceptually here)
+	host := NewHost(2)
 
-	philo := make([]Philo, 5)
-	wg := sync.WaitGroup{}
+	// Create philosophers and run
+	var wg sync.WaitGroup
 	wg.Add(5)
 
 	for i := 0; i < 5; i++ {
-		philo[i] = Philo{
-			n:       i + 1,
+		p := Philo{
+			n:       i + 1, // 1..5
 			leftCs:  cSticks[i],
 			rightCs: cSticks[(i+1)%5],
 		}
-
-		go philo[i].eat(&wg)
+		go p.eat(host, &wg)
 	}
+
 	wg.Wait()
-
-}
-
-func host() {
-	counter := 0
-	for {
-
-		select {
-		case <-askForEatChannel:
-			if counter < 2 {
-				permissionChannel <- true
-				counter++
-			} else {
-				permissionChannel <- false
-			}
-		case <-philoChannel:
-			counter--
-		}
-	}
 }
