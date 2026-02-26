@@ -5,81 +5,144 @@ import (
 	"sync"
 )
 
-type chopStick struct {
-	sync.Mutex
-}
+// --- Chopsticks ---
+
+type chopStick struct{ sync.Mutex }
+
+// --- Philosopher ---
 
 type Philo struct {
 	n               int
 	leftCs, rightCs *chopStick
 }
 
-// Host: semaphore of size 2 (at most 2 philosophers eating concurrently)
+// --- Host (runs in its own goroutine) ---
+
+type request struct {
+	reply chan struct{} // host closes/sends to grant permission
+}
+
 type Host struct {
-	permits chan struct{}
+	reqCh  chan request
+	doneCh chan struct{}
 }
 
 func NewHost(maxConcurrent int) *Host {
-	h := &Host{permits: make(chan struct{}, maxConcurrent)}
-	// Fill with tokens
-	for i := 0; i < maxConcurrent; i++ {
-		h.permits <- struct{}{}
+	h := &Host{
+		reqCh:  make(chan request),
+		doneCh: make(chan struct{}),
 	}
+	go h.run(maxConcurrent)
 	return h
 }
 
-func (h *Host) Acquire() { <-h.permits }
+func (h *Host) run(maxConcurrent int) {
+	eating := 0
+	var queue []request
 
-func (h *Host) Release() { h.permits <- struct{}{} }
+	for {
+		// If there is capacity and someone is queued, grant immediately.
+		if eating < maxConcurrent && len(queue) > 0 {
+			r := queue[0]
+			queue = queue[1:]
+			eating++
+			// Grant permission
+			r.reply <- struct{}{}
+			close(r.reply)
+			continue
+		}
+
+		select {
+		case r := <-h.reqCh:
+			if eating < maxConcurrent {
+				eating++
+				r.reply <- struct{}{}
+				close(r.reply)
+			} else {
+				// queue the request until someone finishes
+				queue = append(queue, r)
+			}
+
+		case <-h.doneCh:
+			// One philosopher finished eating
+			if eating > 0 {
+				eating--
+			}
+		}
+	}
+}
+
+func (h *Host) Acquire() {
+	r := request{reply: make(chan struct{})}
+	h.reqCh <- r
+	<-r.reply // wait until host grants permission
+}
+
+func (h *Host) Release() {
+	h.doneCh <- struct{}{}
+}
+
+// --- Eating logic ---
 
 func (p Philo) eat(host *Host, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for meal := 0; meal < 3; meal++ {
-		// Ask permission from host (blocks if already 2 eating)
+		// Ask permission from host (host goroutine enforces max 2 concurrent)
 		host.Acquire()
 
-		// Pick up chopsticks (any order; not lowest-numbered trick)
-		p.leftCs.Lock()
-		p.rightCs.Lock()
+		// Pick up chopsticks in any order (not lowest-numbered first).
+		// To keep it "any order", we alternate by philosopher number.
+		if p.n%2 == 0 {
+			p.rightCs.Lock()
+			p.leftCs.Lock()
+		} else {
+			p.leftCs.Lock()
+			p.rightCs.Lock()
+		}
 
-		// Must print after obtaining necessary locks
+		// Print after obtaining necessary locks
 		fmt.Printf("starting to eat %d\n", p.n)
 
-		// Must print before releasing locks
+		// (No sleep needed by the spec; keeping it minimal/deterministic.)
+
+		// Print before releasing locks
 		fmt.Printf("finishing eating %d\n", p.n)
 
 		// Put down chopsticks
 		p.rightCs.Unlock()
 		p.leftCs.Unlock()
 
-		// Tell host we're done (free a slot)
+		// Tell host we're done
 		host.Release()
 	}
 }
 
 func main() {
+	// Create 5 chopsticks
 	cSticks := make([]*chopStick, 5)
 	for i := 0; i < 5; i++ {
 		cSticks[i] = new(chopStick)
 	}
 
-	// Create host (own goroutine not strictly needed for semaphore,
-	// but the host "executes independently" conceptually here)
+	// Host allows at most 2 philosophers to eat concurrently (in its own goroutine)
 	host := NewHost(2)
 
-	// Create philosophers and run
-	var wg sync.WaitGroup
-	wg.Add(5)
-
+	// Create 5 philosophers (1..5)
+	philos := make([]Philo, 5)
 	for i := 0; i < 5; i++ {
-		p := Philo{
-			n:       i + 1, // 1..5
+		philos[i] = Philo{
+			n:       i + 1,
 			leftCs:  cSticks[i],
 			rightCs: cSticks[(i+1)%5],
 		}
-		go p.eat(host, &wg)
 	}
 
+	// Run philosophers
+	var wg sync.WaitGroup
+	wg.Add(5)
+	for i := 0; i < 5; i++ {
+		go philos[i].eat(host, &wg)
+	}
 	wg.Wait()
 }
