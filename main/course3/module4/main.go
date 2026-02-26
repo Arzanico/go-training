@@ -29,6 +29,7 @@ func NewHost(maxConcurrent int) *Host {
 }
 
 func (h *Host) Acquire() { <-h.permits }
+
 func (h *Host) Release() { h.permits <- struct{}{} }
 
 func (p Philo) eat(host *Host, wg *sync.WaitGroup) {
@@ -58,7 +59,6 @@ func (p Philo) eat(host *Host, wg *sync.WaitGroup) {
 }
 
 func main() {
-	// Create chopsticks
 	cSticks := make([]*chopStick, 5)
 	for i := 0; i < 5; i++ {
 		cSticks[i] = new(chopStick)
