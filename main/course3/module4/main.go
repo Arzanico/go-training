@@ -65,6 +65,7 @@ func (o *host) run(maxConcurrent int) {
 				occupiedSeatCounter++
 				r.reply <- struct{}{}
 				close(r.reply)
+				continue
 			}
 			philosQueue = append(philosQueue, r)
 		case <-o.releaseSeatCh:
@@ -91,7 +92,6 @@ func (o *philosopher) eat(h *host, wg *sync.WaitGroup) {
 		o.leftCS.Unlock()
 		fmt.Printf("end eating %d\n", o.n)
 		h.release()
-		i++
 	}
 }
 
