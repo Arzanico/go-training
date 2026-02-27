@@ -61,25 +61,25 @@ func (o *host) run(maxConcurrent int) {
 
 			r.reply <- struct{}{}
 			close(r.reply)
-			fmt.Printf("[HOST] DEQ   req=%s  action=GRANT_FROM_QUEUE  occupied=%d->%d  qlen=%d\n",
+			fmt.Printf("[HOST] DEQ   req=%s  ACCIONion=GRANT_FROM_QUEUE  occupied=%d->%d  qlen=%d\n",
 				r.uuid, occupiedSeatCounter, occupiedSeatCounter+1, len(requestQueue))
 		}
 
 		select {
 		case r := <-o.requestSeatCh:
-			fmt.Printf("[HOST] RECV  req=%s  occupied=%d  qlen=%d\n",
+			fmt.Printf("[HOST] RECEIVED  req=%s  occupied=%d  qlen=%d\n",
 				r.uuid, occupiedSeatCounter, len(requestQueue))
 			if occupiedSeatCounter < maxConcurrent {
 				occupiedSeatCounter++
 
 				r.reply <- struct{}{}
 				close(r.reply)
-				fmt.Printf("[HOST] ACT   req=%s  action=%s  occupied=%d  qlen=%d\n",
+				fmt.Printf("[HOST] ACCION   req=%s  ACCIONion=%s  occupied=%d  qlen=%d\n",
 					r.uuid, "GRANT", occupiedSeatCounter, len(requestQueue))
 				continue
 			}
 			requestQueue = append(requestQueue, r)
-			fmt.Printf("[HOST] ACT   req=%s  action=%s  occupied=%d  qlen=%d\n",
+			fmt.Printf("[HOST] ACCION   req=%s  ACCIONion=%s  occupied=%d  qlen=%d\n",
 				r.uuid, "QUEUED", occupiedSeatCounter, len(requestQueue))
 		case <-o.releaseSeatCh:
 			if occupiedSeatCounter > 0 {
