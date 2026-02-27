@@ -26,7 +26,9 @@ func newHost() *host {
 		releaseSeatCh: make(chan seat),
 	}
 
+	go h.run(2)
 	return h
+
 }
 
 func (o *host) acquire() {
@@ -79,6 +81,7 @@ type philosopher struct {
 }
 
 func (o *philosopher) eat(h *host, wg *sync.WaitGroup) {
+	defer wg.Done()
 	for i := 0; i < 3; i++ {
 		h.acquire()
 		o.leftCS.Lock()
@@ -87,11 +90,9 @@ func (o *philosopher) eat(h *host, wg *sync.WaitGroup) {
 		o.rightCS.Unlock()
 		o.leftCS.Unlock()
 		fmt.Printf("end eating %d\n", o.n)
-		i++
 		h.release()
+		i++
 	}
-
-	wg.Done()
 }
 
 func main() {
@@ -101,20 +102,21 @@ func main() {
 		chopSticks[i] = new(chopStick)
 	}
 
-	h := newHost()
-	h.run(2)
-
 	philosophers := make([]philosopher, 5)
-	philoWg := new(sync.WaitGroup)
 	for i := 0; i < 5; i++ {
 		philosophers[i] = philosopher{
 			n:       i,
 			leftCS:  chopSticks[i],
 			rightCS: chopSticks[(i+1)%5],
 		}
-		go philosophers[i].eat(h, philoWg)
 	}
 
-	philoWg.Wait()
+	h := newHost()
+	wg := new(sync.WaitGroup)
+	wg.Add(5)
+	for i := 0; i < 5; i++ {
+		go philosophers[i].eat(h, wg)
+	}
+	wg.Wait()
 
 }
