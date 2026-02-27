@@ -79,8 +79,7 @@ func (o *host) run(maxConcurrent int) {
 				continue
 			}
 			requestQueue = append(requestQueue, r)
-			fmt.Printf("[HOST] ACCION   req=%s  ACCIONion=%s  occupied=%d  qlen=%d\n",
-				r.uuid, "QUEUED", occupiedSeatCounter, len(requestQueue))
+			fmt.Printf("[HOST] ACCION   req=%s  ACCIONion=%s  occupied=%d  qlen=%d\n", r.uuid, "QUEUED", occupiedSeatCounter, len(requestQueue))
 		case <-o.releaseSeatCh:
 			if occupiedSeatCounter > 0 {
 				occupiedSeatCounter--
