@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 type seat struct{}
@@ -12,6 +14,7 @@ type chopStick struct {
 }
 
 type request struct {
+	uuid  string
 	reply chan struct{}
 }
 
@@ -33,6 +36,7 @@ func newHost() *host {
 
 func (o *host) acquire() {
 	r := request{
+		uuid:  uuid.NewString(),
 		reply: make(chan struct{}),
 	}
 	o.requestSeatCh <- r
@@ -46,28 +50,37 @@ func (o *host) release() {
 func (o *host) run(maxConcurrent int) {
 
 	occupiedSeatCounter := 0
-	philosQueue := make([]request, 0)
+	requestQueue := make([]request, 0)
 
 	for {
-		if occupiedSeatCounter < maxConcurrent && len(philosQueue) > 0 {
-			p := philosQueue[0]
-			philosQueue = philosQueue[1:]
+		if occupiedSeatCounter < maxConcurrent && len(requestQueue) > 0 {
+			r := requestQueue[0]
+			requestQueue = requestQueue[1:]
 
 			occupiedSeatCounter++
 
-			p.reply <- struct{}{}
-			close(p.reply)
+			r.reply <- struct{}{}
+			close(r.reply)
+			fmt.Printf("[HOST] DEQ   req=%s  action=GRANT_FROM_QUEUE  occupied=%d->%d  qlen=%d\n",
+				r.uuid, occupiedSeatCounter, occupiedSeatCounter+1, len(requestQueue))
 		}
 
 		select {
 		case r := <-o.requestSeatCh:
+			fmt.Printf("[HOST] RECV  req=%s  occupied=%d  qlen=%d\n",
+				r.uuid, occupiedSeatCounter, len(requestQueue))
 			if occupiedSeatCounter < maxConcurrent {
 				occupiedSeatCounter++
+
 				r.reply <- struct{}{}
 				close(r.reply)
+				fmt.Printf("[HOST] ACT   req=%s  action=%s  occupied=%d  qlen=%d\n",
+					r.uuid, "GRANT", occupiedSeatCounter, len(requestQueue))
 				continue
 			}
-			philosQueue = append(philosQueue, r)
+			requestQueue = append(requestQueue, r)
+			fmt.Printf("[HOST] ACT   req=%s  action=%s  occupied=%d  qlen=%d\n",
+				r.uuid, "QUEUED", occupiedSeatCounter, len(requestQueue))
 		case <-o.releaseSeatCh:
 			if occupiedSeatCounter > 0 {
 				occupiedSeatCounter--
