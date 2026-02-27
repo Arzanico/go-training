@@ -109,6 +109,8 @@ func (o *philosopher) eat(h *host, wg *sync.WaitGroup) {
 
 func main() {
 
+	fmt.Println("start...")
+
 	chopSticks := make([]*chopStick, 5)
 	for i := 0; i < 5; i++ {
 		chopSticks[i] = new(chopStick)
