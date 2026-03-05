@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 type internalRequest struct {
@@ -18,13 +19,15 @@ type externalResponse struct {
 
 func (o *externalResponse) reply() {
 	// random time for sending the externalResponse back
-	//time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 	n := rand.Intn(10)
 	var responseCode int
-	if n > 5 {
-		responseCode = 500
-	} else {
+	switch {
+	case n < 4:
+		responseCode = 200
+	case n < 7:
 		responseCode = 400
+	default:
+		responseCode = 500
 	}
 
 	o.statusCode = responseCode
@@ -102,6 +105,22 @@ func (c *claim) handleClaim(respCh chan externalResponse) {
 		idempotencyKey: c.id,
 	}
 	exResponse.reply()
+
+	if exResponse.statusCode == 500 {
+		for i := 0; i < 2; i++ {
+			backoff := i * i
+			time.Sleep(time.Duration(backoff) * time.Millisecond)
+			exResponse.reply()
+			if exResponse.statusCode != 500 {
+				break
+			}
+		}
+	}
+
+	if exResponse.statusCode == 500 {
+		exResponse.body = []byte("request to partner failure")
+	}
+
 	respCh <- exResponse
 }
 
@@ -110,10 +129,9 @@ func worker(cCh chan *claim, resp chan externalResponse, wg *sync.WaitGroup) {
 		task.handleClaim(resp)
 		wg.Done()
 	}
-
 }
 
-func handleClaims(_ *storage, r []internalRequest) {
+func handleClaims(s *storage, r []internalRequest) {
 	jobChan := make(chan *claim, len(r))
 	responseChannel := make(chan externalResponse, len(r))
 	partnerResponse := make([]externalResponse, 0, len(r))
@@ -130,6 +148,7 @@ func handleClaims(_ *storage, r []internalRequest) {
 			index:           i,
 			internalRequest: iR,
 		}
+		s.storeRequest(iR)
 		jobChan <- c
 
 	}
@@ -139,12 +158,12 @@ func handleClaims(_ *storage, r []internalRequest) {
 	close(responseChannel)
 
 	for result := range responseChannel {
+		s.storeResponse(result)
 		partnerResponse = append(partnerResponse, result)
-
 	}
 
 	for _, response := range partnerResponse {
-		fmt.Printf("Partner response: %d\n", response.idempotencyKey)
-		fmt.Printf("Partner response: %d\n", response.statusCode)
+		fmt.Printf("Idenpotency key : %d\n", response.idempotencyKey)
+		fmt.Printf("Partner response : %d\n", response.statusCode)
 	}
 }
