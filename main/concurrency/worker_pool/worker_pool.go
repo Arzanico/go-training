@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
-	"net/url"
+	"net/http/httptest"
 	"sync"
 	"time"
 
@@ -22,39 +23,56 @@ type claimRequest struct {
 
 // way to process the task
 func (o *claimRequest) process() {
-
 	partnerUrl := "/partner/claims"
-	request := http.Request{
-		Method: "POST",
-		URL:    &url.URL{Path: partnerUrl},
-		Header: nil,
-		Body:   io.NopCloser(bytes.NewBuffer(o.body)),
+	//server es un mock para testear el caso de uso del pool, en la proxima iteracion esto deberia estar afuera del process
+	// para que todos los workeres le peguen al mismo servidor
+	server := httptest.NewServer(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(time.Duration(rand.Intn(50)) * time.Millisecond)
+			if r.URL.Path != partnerUrl {
+				w.WriteHeader(http.StatusNotFound)
+				_, _ = w.Write([]byte(`{"payload":"not found"}`))
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"payload":"successfully processed"}`))
+
+		}))
+	defer server.Close()
+
+	//mocked server url es la url aleatoria en donde se levanta el servidor de test + el path que yo quiero
+	mockedServerUrl := server.URL + partnerUrl
+	request, err := http.NewRequest(
+		http.MethodPost,
+		mockedServerUrl,
+		bytes.NewBuffer(o.body),
+	)
+
+	if err != nil {
+		panic(err)
 	}
 
-	request.Header.Add("x-idempotency-key", uuid.NewString())
+	request.Header.Set("x-idempotency-key", uuid.NewString())
 	httpClient := &http.Client{
 		Timeout: time.Second * 10,
 	}
 
-	response, err := httpClient.Do(&request)
+	response, err := httpClient.Do(request)
+	defer func() {
+		_ = response.Body.Close()
+	}()
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	responsePayload, err := io.ReadAll(response.Body)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	fmt.Println("response status code: ", response.StatusCode)
 	fmt.Println("response body: ", string(responsePayload))
-	defer func() {
-		err = response.Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}()
-
 	fmt.Printf("claim request with id %d succesfully processed\n", o.id)
 
 }
