@@ -1,0 +1,13 @@
+Un endpoint recibe POST /claims/batch con 1.000 claims.
+Por cada claim hay que:
+- validar,
+- enriquecer con datos internos desde la Base de Datos,
+- llamar a un partner (HTTP),
+- persistir resultado
+
+Requisitos:
+- Límite de concurrencia: máximo 20 llamadas simultáneas al partner
+- Timeout total del request: 10s (si se excede, cancelás todo)
+- Si una llamada falla con error “retryable” (5xx/timeout), reintenta hasta 3 con backoff.
+- Necesitás devolver un resumen: ok, failed, y lista de errores por claim.
+- No querés memory blow-ups ni goroutine leaks.
