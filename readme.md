@@ -1,7 +1,7 @@
-# Go Training – Coursera (Programming with Google Go)
+# Go Training – 
 
-This repository contains my exercises, practice work, and peer-reviewed assignments from the
-Programming with Google Go Specialization offered on Coursera (University of California, Irvine).
+This repository contains my own exercises, practice work, and peer-reviewed assignments from the
+Programming with Google Go Specialization from Coursera.
 
 The main goal of this repository is to learn Go.
 
@@ -11,26 +11,9 @@ The main goal of this repository is to learn Go.
 
 ---
 
-## About the Specialization
-
-The Programming with Google Go specialization introduces the Go programming language from the ground up and gradually moves toward more advanced concepts, with a strong emphasis on concurrency and idiomatic Go design.
-
-The specialization is composed of three courses:
-
-1. Getting Started with Go  
-   Covers the basics of the language: types, control flow, structs, slices, maps, and basic error handling.
-
-2. Functions, Methods, and Interfaces in Go  
-   Focuses on abstraction, encapsulation, methods, interfaces, and composition.
-
-3. Concurrency in Go  
-   Explores concurrency using goroutines, channels, mutexes, and classic synchronization patterns.
-
----
-
 ## Repository Structure
 
-The repository structure follows the organization of the specialization and its modules:
+The repository structure follows the organization of the specialization and my own modules:
 
 .
 ├── main/
@@ -50,6 +33,8 @@ The repository structure follows the organization of the specialization and its 
 │   │   │       └── main.go
 │   │   └── module4/
 │   │       └── main.go
+├── concurrency/
+│   ├── worker-poool/
 │
 ├── go.mod
 └── README.md
@@ -62,6 +47,7 @@ The repository structure follows the organization of the specialization and its 
 - Each moduleX directory corresponds to a weekly module.
 - The peer directory contains peer-reviewed assignments.
 - Each exercise is self-contained and executable using go run.
+- my own exercises will be in its folder category
 
 ---
 
@@ -84,14 +70,6 @@ From the root of the repository, you can run any exercise like this:
 go run main/course3/module3/peer/main.go
 
 Each main.go file can be executed independently.
-
----
-
-## Requirements
-
-- Go 1.18 or higher
-- Basic programming knowledge
-- Interest in concurrency and systems programming
 
 ---
 
