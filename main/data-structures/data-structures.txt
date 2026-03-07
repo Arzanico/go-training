@@ -1,0 +1,6 @@
+Una estructura de datas es una forma de organizar, gestionar y almacenar informacion.
+Generalmente en memoria RAM.
+Estas "formas" permite luego acceder a la infroamcion y mmanipularla de forma eficiente.
+Ademas, las estructuras de datos, nos permiteng implementar formas concretas de typos de datos abstractos,
+optimizando el rendimiento de algoritmos de busqueda, ordenamiento y almacenamiento.
+
