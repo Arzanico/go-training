@@ -4,3 +4,16 @@ Estas "formas" permite luego acceder a la infroamcion y mmanipularla de forma ef
 Ademas, las estructuras de datos, nos permiteng implementar formas concretas de typos de datos abstractos,
 optimizando el rendimiento de algoritmos de busqueda, ordenamiento y almacenamiento.
 
+Ejemplos
+Características y puntos clave:
+Eficiencia: Diseñadas para maximizar la velocidad y minimizar el uso de memoria al realizar operaciones.
+Organización: Pueden ser lineales (listas, pilas, colas) o no lineales (árboles, grafos).
+Manipulación: Definen cómo se insertan, eliminan, buscan y ordenan los elementos.
+Uso en el contexto de sistemas: Son fundamentales en sistemas operativos, bases de datos y desarrollo de software para gestionar procesos y archivos.
+
+Ejemplos comunes:
+Arrays (Arreglos): Listas ordenadas de elementos, frecuentemente del mismo tipo.
+Pilas (Stacks): Estructura LIFO (Last In, First Out), el último en entrar es el primero en salir.
+Colas (Queues): Estructura FIFO (First In, First Out), el primero en entrar es el primero en salir.
+Árboles y Grafos: Estructuras no lineales para relaciones jerárquicas o complejas.
+
