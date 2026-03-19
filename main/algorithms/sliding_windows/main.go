@@ -4,28 +4,50 @@ import "fmt"
 
 func main() {
 	s := "bbbbbbbbbbbbbbbbbbbbbbbbd"
+	v := findLongestSubStringWithNoDuplicated(s)
+	fmt.Printf("Max unique chain found %s length %d\n", v, len(v))
 
-	var validWindow string
+	i := []int{1, 2, 6, 4, 3, 5, 4}
+	target := 11
+	vI := findFirstSubGroupGraterThanTarget(i, target)
+	fmt.Printf("found %v for which sum is equal or grater than %d\n", vI, len(v))
+
+}
+
+func findLongestSubStringWithNoDuplicated(s string) string {
+	runes := []rune(s)
+
+	var validWindow []rune
 	var left int
 
-	control := make(map[byte]struct{})
-
-	for i := 0; i < len(s); i++ {
+	control := make(map[rune]struct{})
+	for i := 0; i < len(runes); i++ {
 		for {
-			if _, exist := control[s[i]]; !exist {
+			if _, exist := control[runes[i]]; !exist {
 				break
 			}
 
-			delete(control, s[left])
+			delete(control, runes[left])
 			left++
 		}
 
-		control[s[i]] = struct{}{}
-
-		if len(s[left:i+1]) > len(validWindow) {
-			validWindow = s[left : i+1]
+		control[runes[i]] = struct{}{}
+		if len(runes[left:i+1]) > len(validWindow) {
+			validWindow = runes[left : i+1]
 		}
 	}
+	return string(validWindow)
+}
 
-	fmt.Printf("Max chain found is %v with a length of %d\n", validWindow, len(validWindow))
+func findFirstSubGroupGraterThanTarget(g []int, t int) []int {
+	var sum int
+	for i := 0; i < len(g); i++ {
+		sum += g[i]
+		if sum >= t {
+			return g[0 : i+1]
+		}
+
+	}
+
+	return nil
 }
