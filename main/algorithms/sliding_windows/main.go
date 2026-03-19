@@ -1,46 +1,31 @@
 package main
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 func main() {
-	s := "abbcccdbdrfgtrhiplfhjgrialcovnrrnlp"
-	l := make([]string, 0)
-	for i := range s {
-		l = append(l, string(s[i]))
-	}
+	s := "bbbbbbbbbbbbbbbbbbbbbbbbd"
 
-	chains := make(map[string]int)
-	window := make([]string, 0)
+	var validWindow string
 	var left int
 
-	for i := 0; i < len(l); i++ {
-		window = l[left:i]
+	control := make(map[byte]struct{})
 
-		control := make(map[string]struct{})
-		for j := range window {
-			if _, exists := control[window[j]]; !exists {
-				control[window[j]] = struct{}{}
-			} else {
-				chain := strings.Join(window, "")
-				chains[chain] = len(chain)
-				//fmt.Println("New chain created " + chain)
-				left++
-				continue
+	for i := 0; i < len(s); i++ {
+		for {
+			if _, exist := control[s[i]]; !exist {
+				break
 			}
+
+			delete(control, s[left])
+			left++
 		}
 
-	}
-	var maxChain string
-	var maxLenChain int
-	for k, v := range chains {
-		if v > maxLenChain {
-			maxLenChain = v
-			maxChain = k
+		control[s[i]] = struct{}{}
+
+		if len(s[left:i+1]) > len(validWindow) {
+			validWindow = s[left : i+1]
 		}
 	}
 
-	fmt.Printf("Max chain found is %s with a length of %d\n", maxChain, maxLenChain)
+	fmt.Printf("Max chain found is %v with a length of %d\n", validWindow, len(validWindow))
 }
